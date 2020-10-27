@@ -1,0 +1,16 @@
+app:
+  kind: development
+  port: 8080
+
+jwt:
+  JWT_SECRET: poonshtjwtsecret
+  
+db:
+  mongo:
+    username: root
+    password: root
+    host: localhost
+    port: 27017
+    name: database-name
+    auth: admin
+    collection: database-collection
