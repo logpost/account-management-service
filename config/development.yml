@@ -1,0 +1,22 @@
+app:
+  kind: development
+  port: 8080
+
+jwt:
+  secret:
+    jwt_secret: poonshtjwtsecret
+  options:
+    expires_in: 30d
+    issuer: poonsht
+    audience: poonsht
+
+
+db:
+  mongo:
+    username: root
+    password: root
+    host: localhost
+    port: 27017
+    name: database-name
+    auth: admin
+    collection: database-collection
