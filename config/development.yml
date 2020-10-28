@@ -1,16 +1,40 @@
 app:
+  domain: localhost:5000
   kind: development
-  port: 8080
+  port: 5000
 
 jwt:
-  secret:
-    jwt_secret: poonshtjwtsecret
-  options:
-    expires_in: 30d
-    issuer: poonsht
-    audience: poonsht
+  confirm_email:
+    secret:
+      jwt_secret: logpostemailconfirm
+    options:
+      expires_in: 14hr
+      issuer: logpost
+      audience: mailer
+  private_route:
+    secret:
+      jwt_secret: poonshtjwtsecret
+    options:
+      expires_in: 30d
+      issuer: poonsht
+      audience: poonsht
 
+shipper:
+  api:
+    base_url: http://127.0.0.1:8080
+    prefix_route: /shipper
 
+carrier:
+  api:
+    base_url: http://127.0.0.1:8080
+    prefix_route: /carrier
+
+nodemailer:
+  auth:
+    gmail:
+      username: logpost.bot@gmail.com
+      password: logpost2020
+    
 db:
   mongo:
     username: root
