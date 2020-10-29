@@ -6,6 +6,11 @@ class ShipperAdapter {
     #prefix = config.shipper.api.prefix_route
     #fetcher = axios.create({
         baseURL: config.shipper.api.base_url,
+        headers: {
+            common: {
+                'Authorization': `bearer ${config.app.token}`
+            }
+        }
     });
     
     findAccountByUsername = async (username) => {
@@ -13,7 +18,7 @@ class ShipperAdapter {
             const res = await this.#fetcher.get(`${this.#prefix}/admin/profile/${username}`)
             return res
         } catch (error) {
-            return null
+            return error.response.data
         }
     }
 
