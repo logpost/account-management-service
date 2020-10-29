@@ -1,9 +1,9 @@
 import passport from 'passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import AccountFactory from '../factorys/account.factory'
+import AccountUsecase from '../usecase/account.usecase'
 import config from '../config'
 
-const fetcher = new AccountFactory()
+const accountUsecase = new AccountUsecase()
 
 const options_verify_confirm_email = {
   jwtFromRequest: ExtractJwt.fromUrlQueryParameter("token_email"),
@@ -21,8 +21,8 @@ const options_private_route = {
 
 passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, async (payload, done) => {  
   try {
-      const { username, email, account_type } = payload
-      const { data: account } = await fetcher.account[account_type].findAccountByUsername(username)
+      const { username, email, role } = payload
+      const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username)
       if (account) {
         const user = {
           isConfirmEmail: false,
@@ -31,7 +31,8 @@ passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, 
             username: account.username,
             account_type: account.account_type,
             email,
-          }
+          },
+          role
         }
           
         if(account.email !== 'not_confirm')
@@ -50,8 +51,8 @@ passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, 
 
 passport.use("private-route-rule", new Strategy(options_private_route, async (payload, done) => {  
   try {
-    const { username, account_type } = payload
-    const account = await fetcher.account[account_type].findAccountByUsername(username)
+    const { username, role } = payload
+    const account = await accountUsecase.adminFindAccountByUsername(role, username)
     if (account) {
       const user = {
         isConfirmEmail: false,
@@ -62,7 +63,8 @@ passport.use("private-route-rule", new Strategy(options_private_route, async (pa
           display_name: account.display_name,
           email: account.email,
           account_type: account.account_type
-        }
+        },
+        role
       }
 
       if(account.email !== 'not_confirm')
