@@ -20,7 +20,6 @@ const options_private_route = {
 
 
 passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, async (payload, done) => {  
-  // return done(null, true)
   try {
       const { username, email } = payload
       const {data: account} = await ShipperAdapter.findAccountByUsername(username)
@@ -28,7 +27,7 @@ passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, 
         const user = {
           isConfirmEmail: false,
           profile : {
-            _id: account._id,
+            name: account.name,
             username: account.username,
             account_type: account.account_type,
             email,
@@ -37,7 +36,6 @@ passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, 
           
         if(account.email !== 'not_confirm')
           user.isConfirmEmail = true
-
         return done(null, user)
       } else {
         return done(null, false)
@@ -49,33 +47,34 @@ passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, 
 }))
 
 passport.use("private-route-rule", new Strategy(options_private_route, async (payload, done) => {  
-  return done(null, true)
-//   try {
-//     const { username } = payload
-//     const account = await ShipperAdapter.findAccountByUsername(username)
-//     if (account) {
-//       const user = {
-//         isConfirmEmail: false,
-//         profile : {
-//           _id: account._id,
-//           username: account.username,
-//           email: account.email,
-//           account_type: account.account_type
-//         }
-//       }
+  try {
+    const { username } = payload
+    const account = await ShipperAdapter.findAccountByUsername(username)
+    if (account) {
+      const user = {
+        isConfirmEmail: false,
+        profile : {
+          shipper_id: account._id,
+          username: account.username,
+          name: account.name,
+          display_name: account.display_name,
+          email: account.email,
+          account_type: account.account_type
+        }
+      }
 
-//       if(account.email !== 'not_confirm')
-//         user.isConfirmEmail = true
+      if(account.email !== 'not_confirm')
+        user.isConfirmEmail = true
 
-//       return done(null, user)
+      return done(null, user)
 
-//     } else {
-//       return done(null, false)
-//     }
+    } else {
+      return done(null, false)
+    }
 
-// } catch (error) {
-//     return done(error, false)
-// }
+} catch (error) {
+    return done(error, false)
+}
 }))
 
 export default {
