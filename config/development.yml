@@ -17,8 +17,8 @@ jwt:
       jwt_secret: logpostprivateroute
     options:
       expires_in: 30d
-      issuer: poonsht
-      audience: poonsht
+      issuer: logpost
+      audience: logpost
 
 shipper:
   api:
@@ -27,7 +27,7 @@ shipper:
 
 carrier:
   api:
-    base_url: http://127.0.0.1:8080
+    base_url: http://127.0.0.1:8081
     prefix_route: /carrier
 
 nodemailer:
