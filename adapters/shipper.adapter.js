@@ -13,7 +13,7 @@ class ShipperAdapter {
         }
     });
     
-    findAccountByUsername = async (username) => {
+    adminFindAccountByUsername = async (username) => {
         try {
             const res = await this.#fetcher.get(`${this.#prefix}/admin/profile/${username}`)
             return res
