@@ -1,39 +1,18 @@
 import jwt from 'jsonwebtoken'
 import NodeMailerAdapter from '../adapters/nodemailer.adapter'
-import ShipperAdapter from '../adapters/shipper.adapter'
+import AccountFactory from '../factorys/account.factory'
 import config from '../config'
 import { compareHashed } from '../helper/hashing.handler'
 
 class AccountUsecase {
     
-    fetcher = {
-        shipper: ShipperAdapter,
-        carrier: null
-    }
-    // schema = null 
-    // model = null
-    // collection = null
-
-    // constructor(){
-    //     this.schema = User
-    //     this.collection = config.db.mongo.collection
-    //     this.model = model(this.collection, this.schema) 
-    // }
-
-    // findUserById = async (id) => {
-    //     const user = await this.model.findById(id)
-    //     return user
-    // }
-
-    // findUserByUsername = async (username) => {
-    //     return await this.model.findOne({ username })
-    // }
+    fetcher = new AccountFactory()
 
     signup = async (account_type, profile) => {
         const { username, email, name } = profile
-        const res = await this.fetcher[account_type].createAccount(profile)
+        const res = await this.fetcher.account[account_type].createAccount(profile)
         if(res.status === 200){ 
-            const payload = { username, email, name }
+            const payload = { username, email, name, account_type }
             const claims = { 
                 expiresIn: config.jwt.confirm_email.options.expires_in,
                 issuer: config.jwt.confirm_email.options.issuer,
@@ -50,7 +29,7 @@ class AccountUsecase {
     }
 
     login = async (account_type, username, password) => { 
-        const res = await this.fetcher[account_type].findAccountByUsername(username)
+        const res = await this.fetcher.account[account_type].findAccountByUsername(username)
         const { data: account } = res
         if(account){
             const authorized = await compareHashed(password, account.password)
@@ -85,12 +64,7 @@ class AccountUsecase {
         const secret = config.jwt.private_route.secret.jwt_secret
         return jwt.sign(payload, secret, claims)
     }
-    
-    // updateProfileAccount = async (id, profile) => {
-    //     // const user = await this.model.findById(userId)
-    //     const user = await this.model.updateOne({ id }, { $set: profile })
-    //     return user
-    // }
+
 }
 
 export default AccountUsecase
