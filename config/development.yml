@@ -35,13 +35,3 @@ nodemailer:
     gmail:
       username: logpost.bot@gmail.com
       password: logpost2020
-    
-db:
-  mongo:
-    username: root
-    password: root
-    host: localhost
-    port: 27017
-    name: database-name
-    auth: admin
-    collection: database-collection

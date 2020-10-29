@@ -1,8 +1,9 @@
-import { ExtractJwt, Strategy } from 'passport-jwt'
-
-import ShipperAdapter from '../adapters/shipper.adapter'
 import passport from 'passport'
+import { ExtractJwt, Strategy } from 'passport-jwt'
+import AccountFactory from '../factorys/account.factory'
 import config from '../config'
+
+const fetcher = new AccountFactory()
 
 const options_verify_confirm_email = {
   jwtFromRequest: ExtractJwt.fromUrlQueryParameter("token_email"),
@@ -18,11 +19,10 @@ const options_private_route = {
   audience: config.jwt.private_route.options.audience,
 }
 
-
 passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, async (payload, done) => {  
   try {
-      const { username, email } = payload
-      const {data: account} = await ShipperAdapter.findAccountByUsername(username)
+      const { username, email, account_type } = payload
+      const { data: account } = await fetcher.account[account_type].findAccountByUsername(username)
       if (account) {
         const user = {
           isConfirmEmail: false,
@@ -36,7 +36,9 @@ passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, 
           
         if(account.email !== 'not_confirm')
           user.isConfirmEmail = true
+
         return done(null, user)
+
       } else {
         return done(null, false)
       }
@@ -48,8 +50,8 @@ passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, 
 
 passport.use("private-route-rule", new Strategy(options_private_route, async (payload, done) => {  
   try {
-    const { username } = payload
-    const account = await ShipperAdapter.findAccountByUsername(username)
+    const { username, account_type } = payload
+    const account = await fetcher.account[account_type].findAccountByUsername(username)
     if (account) {
       const user = {
         isConfirmEmail: false,
