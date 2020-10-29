@@ -45,11 +45,11 @@ class NodeMailerAdapter {
         }
 
         this.#transporter = nodemailer.createTransport(this.#transport_info)
-        console.log("NodeMailer: transporter is ready")
+        console.log("NodeMailer: transporter is ready ✉️")
     }
 
     send = async (name, email, token_email) => {
-        let info = await this.#transporter.sendMail({ ...this.#mailpayload, to: email, html: templateEmail(name, email, `http://${config.app.domain}/account/email/confirm/consume?token_email=${token_email}`) })
+        let info = await this.#transporter.sendMail({ ...this.#mailpayload, to: email, html: templateEmail(name, email, `http://${config.app.domain}:${config.app.port}/account/email/confirm/consume?token_email=${token_email}`) })
         // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
         this.logging(info)
     }
