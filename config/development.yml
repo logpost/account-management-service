@@ -30,6 +30,10 @@ carrier:
     base_url: http://127.0.0.1:8081
     prefix_route: /carrier
 
+frontend:
+  domain: localhost
+  port: 3000
+
 nodemailer:
   auth:
     gmail:
