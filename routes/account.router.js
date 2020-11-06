@@ -1,9 +1,9 @@
 import express from 'express'
 
-import responseHandler from '../helper/response.handler'
-import passport from '../middlewares/auth.middleware'
 import AccountUsecase from '../usecase/account.usecase'
 import NodeMailerAdapter from '../adapters/nodemailer.adapter'
+import passport from '../middlewares/auth.middleware'
+import responseHandler from '../helper/response.handler'
 
 const prefix = '/account'
 const router = express.Router()
@@ -53,7 +53,7 @@ router.post(`${prefix}/email/confirm/publish`, passport.verifyEmail, async (req,
         if(isConfirmEmail)
             return `200 : ${email} has been confirmed.`
         const transporter = await NodeMailerAdapter.getInstance()
-        await transporter.send(name, email, role, token_email)
+        transporter.send(name, email, role, token_email)
         return `200 : Done, Message sent to ${email} success. Check your mailbox.`
         
     }, res)

@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import config from './config'
 
 import NodeMailerAdapter from './adapters/nodemailer.adapter'
@@ -10,6 +11,7 @@ const domain = config.app.domain
 
 NodeMailerAdapter.getInstance()
 
+app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 

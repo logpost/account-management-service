@@ -21,7 +21,7 @@ class AccountUsecase {
             const secret = config.jwt.confirm_email.secret.jwt_secret
             const token_email = jwt.sign(payload, secret, claims)
             const transporter = await NodeMailerAdapter.getInstance()
-            await transporter.send(name, email, role, token_email)
+            transporter.send(name, email, role, token_email)
             return { token_email, message: `Done, Message sent to ${email} success. Check your mailbox.` }
         
         }
