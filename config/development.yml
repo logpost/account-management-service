@@ -9,7 +9,7 @@ jwt:
     secret:
       jwt_secret: logpostemailconfirm
     options:
-      expires_in: 14hr
+      expires_in: 10m
       issuer: logpost
       audience: mailer
   private_route:
