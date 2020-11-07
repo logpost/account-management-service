@@ -3,7 +3,7 @@ import NodeMailerAdapter from '../adapters/nodemailer.adapter'
 import AccountFactory from '../factorys/account.factory'
 import config from '../config'
 import { compareHashed } from '../helper/hashing.handler'
-
+import { checkAccountDidConfirmEmail } from '../helper/policy.handler'
 class AccountUsecase {
     
     fetcher = new AccountFactory()
@@ -11,19 +11,29 @@ class AccountUsecase {
     signup = async (role, profile) => {
         const { username, email, name, account_type } = profile
         const res = await this.fetcher.account[role].createAccount(profile)
+
         if(res.status === 200){ 
-            const payload = { username, email, name, role, account_type }
+            const payload = { 
+                name, 
+                email, 
+                role, 
+                username,
+                account_type,
+                isConfirmEmail: false,              
+            }
+
             const claims = { 
                 expiresIn: config.jwt.confirm_email.options.expires_in,
                 issuer: config.jwt.confirm_email.options.issuer,
                 audience: config.jwt.confirm_email.options.audience,
             }
+            
             const secret = config.jwt.confirm_email.secret.jwt_secret
             const token_email = jwt.sign(payload, secret, claims)
             const transporter = await NodeMailerAdapter.getInstance()
             transporter.send(name, email, role, token_email)
-            return { token_email, message: `Done, Message sent to ${email} success. Check your mailbox.` }
-        
+            
+            return { token_email, message: `Done, Message sent to ${email} success. Check your mailbox.` }        
         }
         throw new Error(res.error.message)
     }
@@ -34,20 +44,24 @@ class AccountUsecase {
         if(account){
             const authorized = await compareHashed(password, account.password)
             if(authorized){
+            
                 const payload =  { 
+                    isConfirmEmail: checkAccountDidConfirmEmail(account.email),
                     username: account.username, 
                     name: account.name, 
                     display_name: account.display_name,
                     email: account.email, 
                     account_type: account.account_type,
                     role
-                 }
+                }
+
                 const claims = { 
                     expiresIn: config.jwt.private_route.options.expires_in,
                     issuer: config.jwt.private_route.options.issuer,
                     audience: config.jwt.private_route.options.audience,
-                    subject: account._id.toString(),
+                    subject: account.shipper_id,
                 }
+
                 const secret = config.jwt.private_route.secret.jwt_secret
                 return jwt.sign(payload, secret, claims)
             }
