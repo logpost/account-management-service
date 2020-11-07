@@ -48,9 +48,7 @@ class AccountUsecase {
                 const payload =  { 
                     isConfirmEmail: checkAccountDidConfirmEmail(account.email),
                     username: account.username, 
-                    name: account.name, 
                     display_name: account.display_name,
-                    email: account.email, 
                     account_type: account.account_type,
                     role
                 }
