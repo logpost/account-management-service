@@ -2,86 +2,72 @@ import passport from 'passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import AccountUsecase from '../usecase/account.usecase'
 import config from '../config'
+import { checkAccountDidConfirmEmail } from '../helper/policy.handler'
 
 const accountUsecase = new AccountUsecase()
 
-const options_verify_confirm_email = {
+const options_email_rule = {
   jwtFromRequest: ExtractJwt.fromUrlQueryParameter("token_email"),
   secretOrKey: config.jwt.confirm_email.secret.jwt_secret,
   issuer: config.jwt.confirm_email.options.issuer,
   audience: config.jwt.confirm_email.options.audience,
 }
 
-const options_private_route = {
+const options_auth_rule = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: config.jwt.private_route.secret.jwt_secret,
   issuer: config.jwt.private_route.options.issuer,
   audience: config.jwt.private_route.options.audience,
 }
 
-passport.use("verify-confirm-email", new Strategy(options_verify_confirm_email, async (payload, done) => {  
-  try {
-      const { username, email, role } = payload
-      const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username)
-      if (account) {
-        const user = {
-          isConfirmEmail: false,
-          profile : {
-            name: account.name,
-            username: account.username,
-            account_type: account.account_type,
-            email,
-          },
-          role
-        }
-          
-        if(account.email !== 'not_confirm')
-          user.isConfirmEmail = true
+passport.use("email_rule", new Strategy(options_email_rule, async (payload, done) => {  
+  	try {
+		const { username, role } = payload
+		const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username)
+		
+		if (account)
+			return done(null, payload)
 
-        return done(null, user)
-
-      } else {
-        return done(null, false)
-      }
-
-  } catch (error) {
-      return done(error, false)
-  }
+		// this case its not test yet !!!!
+		return done(null, false)
+		
+	} catch (error) {
+		return done(error, false)
+	}
 }))
 
-passport.use("private-route-rule", new Strategy(options_private_route, async (payload, done) => {  
-  try {
-    const { username, role } = payload
-    const account = await accountUsecase.adminFindAccountByUsername(role, username)
-    if (account) {
-      const user = {
-        isConfirmEmail: false,
-        profile : {
-          shipper_id: account._id,
-          username: account.username,
-          name: account.name,
-          display_name: account.display_name,
-          email: account.email,
-          account_type: account.account_type
-        },
-        role
-      }
+passport.use("auth_rule", new Strategy(options_auth_rule, async (payload, done) => {  
+    try {
+		const { username, role } = payload
+		const account = await accountUsecase.adminFindAccountByUsername(role, username)
+		
+		if (account) {
+			const user = {
+				isConfirmEmail: false,
+				shipper_id: account._id,
+				username: account.username,
+				name: account.name,
+				display_name: account.display_name,
+				email: account.email,
+				account_type: account.account_type,
+				role
+			}
 
-      if(account.email !== 'not_confirm')
-        user.isConfirmEmail = true
+		if(account.email !== 'not_confirm')
+			user.isConfirmEmail = true
 
-      return done(null, user)
+		return done(null, user)
 
-    } else {
-      return done(null, false)
-    }
+		} else {
+		return done(null, false)
+		}
 
-} catch (error) {
-    return done(error, false)
-}
+	} catch (error) {
+		return done(error, false)
+	}
 }))
 
 export default {
-  requireAuth: passport.authenticate('private-route-rule', { session: false }),
-  verifyEmail: passport.authenticate('verify-confirm-email', { session: false })
+  verifyAuth: passport.authenticate('auth_rule', { session: false }),
+  verifyEmail: passport.authenticate('email_rule', { session: false })
 }
