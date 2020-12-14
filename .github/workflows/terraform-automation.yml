@@ -34,7 +34,7 @@ jobs:
 
             - name: Deploy
               run: |
-                  gcloud run deploy ${{ secrets.GCR_IMAGE_NAME }} \
+                  gcloud run deploy ${{ secrets.GCP_CLOUDRUN_SRV_NAME }} \
                   --region ${{ secrets.GCP_REGION }} \
                   --image asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCR_IMAGE_NAME }} \
                   --platform managed \
