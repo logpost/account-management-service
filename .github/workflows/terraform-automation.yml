@@ -35,7 +35,7 @@ jobs:
             - name: Deploy
               run: |
                   gcloud run deploy ${{ secrets.GCR_IMAGE_NAME }} \
-                  --region ${{ secrets.GCR_REGION }} \
+                  --region ${{ secrets.GCP_REGION }} \
                   --image asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCR_IMAGE_NAME }} \
                   --platform managed \
                   --allow-unauthenticated \
