@@ -2,7 +2,7 @@
     "name": "account-management-service",
     "version": "1.0.0",
     "description": "",
-    "main": "src/server.js",
+    "main": "dist/server.js",
     "scripts": {
         "start:dev": "NODE_ENV=development nodemon --watch './**/*.js' --exec babel-node ./src/server.js",
         "start:stag": "NODE_ENV=staging node ./dist/server.js",
