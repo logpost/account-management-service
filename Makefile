@@ -1,5 +1,5 @@
 ImageName := acc-logpost
-DockerPath := ./docker/account.stag.Dockerfile
+DockerPath := ./docker/stag.Dockerfile
 
 GCP_ProjectID := logpost-298506
 GCR_TagStaging := asisa.gcr.io/${GCP_ProjectID}/${ImageName}
