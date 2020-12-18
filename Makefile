@@ -1,4 +1,4 @@
-ImageName := acc-logpost
+ImageName := account-management-service-logpost-stag
 DockerPath := ./docker/stag.Dockerfile
 
 GCP_ProjectID := logpost-298506
