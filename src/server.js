@@ -8,6 +8,7 @@ import AccountRoute from "./routes/account.router";
 const app = express();
 const port = process.env.PORT || config.app.port;
 const domain = config.app.domain;
+const kind = config.app.kind;
 
 NodeMailerAdapter.getInstance();
 
@@ -18,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", AccountRoute);
 
 app.listen(port, () => {
-    console.log(
-        `TEST IMAGE => Account Management Service 👨🏼‍💻👩🏾‍💻\nApp listening on the http://${domain}:${port} 🌟`
-    );
+    console.log(`Account Management Service 👨🏼‍💻👩🏾‍💻`);
+    console.log(`Listening on the http://${domain}:${port} 🌟`);
+    console.log(`Working on ${kind.toUpperCase()} ENVIRONMENT 👻`);
 });
