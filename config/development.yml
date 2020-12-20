@@ -1,41 +1,41 @@
 app:
-  domain: localhost
-  kind: development
-  port: 5000
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwiaWF0IjoxNjAzOTA3NzY5LCJhdWQiOiJhY2NvdW50LW1hbmFnZW1lbnQtc2VydmljZSIsImlzcyI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwic3ViIjoiYWNjb3VudC1tYW5hZ2VtZW50LXNlcnZpY2UifQ.-DTe2a_5_ESzW8Cqh-SIqPP2wws8z-8DflgbbKKAgy4
+    domain: localhost
+    kind: development
+    port: 5000
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwiaWF0IjoxNjAzOTA3NzY5LCJhdWQiOiJhY2NvdW50LW1hbmFnZW1lbnQtc2VydmljZSIsImlzcyI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwic3ViIjoiYWNjb3VudC1tYW5hZ2VtZW50LXNlcnZpY2UifQ.-DTe2a_5_ESzW8Cqh-SIqPP2wws8z-8DflgbbKKAgy4
 
 jwt:
-  confirm_email:
-    secret:
-      jwt_secret: logpostemailconfirm
-    options:
-      expires_in: 10m
-      issuer: logpost
-      audience: mailer
-  private_route:
-    secret:
-      jwt_secret: logpostprivateroute
-    options:
-      expires_in: 30d
-      issuer: logpost
-      audience: logpost
+    confirm_email:
+        secret:
+            jwt_secret: logpostemailconfirm
+        options:
+            expires_in: 10m
+            issuer: logpost
+            audience: mailer
+    private_route:
+        secret:
+            jwt_secret: logpostprivateroute
+        options:
+            expires_in: 30d
+            issuer: logpost
+            audience: logpost
 
 shipper:
-  api:
-    base_url: http://127.0.0.1:8080
-    prefix_route: /shipper
+    api:
+        base_url: https://shipper-management-service-logpost-stag-qjrfn6j7kq-as.a.run.app
+        prefix_route: /shipper
 
 carrier:
-  api:
-    base_url: http://127.0.0.1:8081
-    prefix_route: /carrier
+    api:
+        base_url: https://carrier-management-service-logpost-stag-qjrfn6j7kq-as.a.run.app
+        prefix_route: /carrier
 
 frontend:
-  domain: localhost
-  port: 3000
+    domain: localhost
+    port: 3000
 
 nodemailer:
-  auth:
-    gmail:
-      username: logpost.bot@gmail.com
-      password: logpost2020
+    auth:
+        gmail:
+            username: logpost.bot@gmail.com
+            password: logpost2020
