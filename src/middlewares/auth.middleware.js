@@ -8,8 +8,8 @@ const accountUsecase = new AccountUsecase();
 
 var cookieRefreshTokenExtractor = function (req) {
     var token = null;
-    if (req && req.cookies) {
-        token = req.cookies["refresh_token"];
+    if (req && req.signedCookies) {
+        token = req.signedCookies["refresh_token"];
     }
     return token;
 };

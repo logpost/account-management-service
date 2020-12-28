@@ -1,5 +1,6 @@
 import express from "express";
 
+import config from "../config";
 import AccountUsecase from "../usecase/account.usecase";
 import NodeMailerAdapter from "../adapters/nodemailer.adapter";
 import passport from "../middlewares/auth.middleware";
@@ -8,6 +9,14 @@ import responseHandler, { responseSender } from "../helper/response.handler";
 const prefix = "/account";
 const router = express.Router();
 const accountUsecase = new AccountUsecase();
+
+const cookie_opt = {
+    httpOnly: config.cookie.options.httpOnly,
+    domain: config.cookie.options.domain,
+    secure: config.cookie.options.secure,
+    maxAge: config.cookie.options.maxAge,
+    signed: config.cookie.options.signed,
+};
 
 router.get(`${prefix}/healthcheck`, (req, res) => {
     responseHandler(async () => {
@@ -46,7 +55,8 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
         const { username, password } = req.body;
         if (role) {
             const [refresh_token, access_token] = await accountUsecase.login(role, username, password);
-            return { refresh_token, access_token };
+            res.cookie("refresh_token", refresh_token, cookie_opt);
+            return { access_token };
         } else {
             throw new Error("400 : Invalid, role is empty on param query");
         }
@@ -56,15 +66,17 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
 router.post(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => {
     responseHandler(async () => {
         const account = req.user;
-        const { refresh_token } = req.cookies;
+        const { refresh_token } = req.signedCookies;
         const { role } = account;
-
-        if (role) {
-            const access_token = await accountUsecase.generateAccessTokenFromRefreshToken(account, refresh_token);
-            return { access_token };
-        } else {
-            throw new Error("400 : Invalid, role is empty on param query");
+        if (refresh_token) {
+            if (role) {
+                const access_token = await accountUsecase.generateAccessTokenFromRefreshToken(account, refresh_token);
+                return { access_token };
+            } else {
+                throw new Error("400 : Invalid, role is empty on param query");
+            }
         }
+        throw new Error("400 : Invalid, Cookie is invalid");
     }, res);
 });
 
