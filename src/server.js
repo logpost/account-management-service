@@ -8,6 +8,7 @@ import NodeMailerAdapter from "./adapters/nodemailer.adapter";
 import AccountRoute from "./routes/account.router";
 
 const app = express();
+
 const port = process.env.PORT || config.app.port;
 const domain = config.app.domain;
 const kind = config.app.kind;
@@ -16,7 +17,7 @@ RedisAdapter.getInstance();
 NodeMailerAdapter.getInstance();
 
 app.use(cors());
-app.use(cookieParser());
+app.use(cookieParser(config.cookie.secret));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
