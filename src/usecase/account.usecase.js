@@ -1,94 +1,82 @@
-import jwt from 'jsonwebtoken'
-import NodeMailerAdapter from '../adapters/nodemailer.adapter'
-import AccountFactory from '../factorys/account.factory'
-import config from '../config'
-import { compareHashed } from '../helper/hashing.handler'
-import { checkAccountDidConfirmEmail } from '../helper/policy.handler'
+import jwt from "jsonwebtoken";
+import RedisAdapter from "../adapters/redis.adapter";
+import NodeMailerAdapter from "../adapters/nodemailer.adapter";
+import AccountFactory from "../factorys/account.factory";
+import config from "../config";
+
+import { compareHashed } from "../helper/hashing.handler";
+
+import { createEmailConfirmToken, createAccessToken, createRefreshToken } from "../helper/token.handler";
 class AccountUsecase {
-    
-    fetcher = new AccountFactory()
+    fetcher = new AccountFactory();
+    refreshTokenStore = RedisAdapter.getInstance();
 
     signup = async (role, profile) => {
-        const { username, email, name, account_type } = profile
-        const res = await this.fetcher.account[role].createAccount(profile)
+        const res = await this.fetcher.account[role].createAccount(profile);
 
-        if(res.status === 200){ 
-            const payload = { 
-                name, 
-                email, 
-                role, 
-                username,
-                account_type,
-                isConfirmEmail: false,              
-            }
+        if (res.status === 200) {
+            const { name, email } = profile;
+            const email_token = await createEmailConfirmToken({ ...profile, role });
 
-            const claims = { 
-                expiresIn: config.jwt.confirm_email.options.expires_in,
-                issuer: config.jwt.confirm_email.options.issuer,
-                audience: config.jwt.confirm_email.options.audience,
-            }
-            
-            const secret = config.jwt.confirm_email.secret.jwt_secret
-            const token_email = jwt.sign(payload, secret, claims)
-            const transporter = await NodeMailerAdapter.getInstance()
-            transporter.send(name, email, role, token_email)
-            
-            return { token_email, message: `Done, Message sent to ${email} success. Check your mailbox.` }        
+            const transporter = await NodeMailerAdapter.getInstance();
+            transporter.send(name, email, role, email_token);
+            return {
+                email_token,
+                message: `Done, Message sent to ${email} success. Check your mailbox.`,
+            };
         }
-        throw new Error(res.error.message)
-    }
+        throw new Error(res.error.message);
+    };
 
-    login = async (role, username, password) => { 
-        const res = await this.fetcher.account[role].adminFindAccountByUsername(username)
-        const { data: account } = res
-        if(account){
-            const authorized = await compareHashed(password, account.password)
-            if(authorized){
-            
-                const payload =  { 
-                    isConfirmEmail: checkAccountDidConfirmEmail(account.email),
-                    username: account.username, 
-                    display_name: account.display_name,
-                    account_type: account.account_type,
-                    role
-                }
-
-                const claims = { 
-                    expiresIn: config.jwt.private_route.options.expires_in,
-                    issuer: config.jwt.private_route.options.issuer,
-                    audience: config.jwt.private_route.options.audience,
-                    subject: account.shipper_id,
-                }
-
-                const secret = config.jwt.private_route.secret.jwt_secret
-                return jwt.sign(payload, secret, claims)
+    login = async (role, username, password) => {
+        const res = await this.fetcher.account[role].adminFindAccountByUsername(username);
+        const { data: account } = res;
+        if (account) {
+            const authorized = await compareHashed(password, account.password);
+            if (authorized) {
+                const refresh_token = await createRefreshToken(account);
+                const access_token = await createAccessToken(account);
+                await this.refreshTokenStore.set(username, refresh_token);
+                return [refresh_token, access_token];
             }
-            throw new Error('400 : Invalid, password is not match')
+            throw new Error("400 : Invalid, password is not match");
         }
-        throw new Error(res.error.message)
-    }
-    
+        throw new Error(res.error.message);
+    };
+
+    generateAccessTokenFromRefreshToken = async (account, refresh_token) => {
+        const { username } = account;
+
+        if (
+            (await this.refreshTokenStore.exists(username)) &&
+            (await this.refreshTokenStore.get(username)) === refresh_token
+        ) {
+            const access_token = await createAccessToken(account);
+            return access_token;
+        }
+        throw new Error("Your refresh_token is not valid.");
+    };
+
     adminFindAccountByUsername = async (role, username) => {
-        const res = await this.fetcher.account[role].adminFindAccountByUsername(username)
-        return res 
-    }
+        const res = await this.fetcher.account[role].adminFindAccountByUsername(username);
+        return res;
+    };
 
     confirmedWithEmail = async (role, username, email) => {
-        const res = await this.fetcher.account[role].confirmedWithEmail(username, email)
-        return res 
-    }
+        const res = await this.fetcher.account[role].confirmedWithEmail(username, email);
+        return res;
+    };
 
     createService = async (service_name) => {
-        const payload = { username: service_name }
-        const claims = { 
+        const payload = { username: service_name };
+        const claims = {
             issuer: service_name,
             audience: service_name,
             subject: service_name,
-        }
-        const secret = config.jwt.private_route.secret.jwt_secret
-        return jwt.sign(payload, secret, claims)
-    }
-
+        };
+        const secret = config.jwt.access_token.secret.jwt_secret;
+        return jwt.sign(payload, secret, claims);
+    };
 }
 
-export default AccountUsecase
+export default AccountUsecase;

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import config from "./config";
 
+import RedisAdapter from "./adapters/redis.adapter";
 import NodeMailerAdapter from "./adapters/nodemailer.adapter";
 import AccountRoute from "./routes/account.router";
 
@@ -10,6 +11,7 @@ const port = process.env.PORT || config.app.port;
 const domain = config.app.domain;
 const kind = config.app.kind;
 
+RedisAdapter.getInstance();
 NodeMailerAdapter.getInstance();
 
 app.use(cors());
