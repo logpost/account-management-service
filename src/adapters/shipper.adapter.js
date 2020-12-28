@@ -1,45 +1,43 @@
-import axios from 'axios'
-import config from '../config'
+import axios from "axios";
+import config from "../config";
 
 class ShipperAdapter {
-
-    #prefix = config.shipper.api.prefix_route
+    #prefix = config.shipper.api.prefix_route;
     #fetcher = axios.create({
         baseURL: config.shipper.api.base_url,
         headers: {
             common: {
-                'Authorization': `bearer ${config.app.token}`
-            }
-        }
+                Authorization: `bearer ${config.app.token}`,
+            },
+        },
     });
-    
+
     adminFindAccountByUsername = async (username) => {
         try {
-            const res = await this.#fetcher.get(`${this.#prefix}/admin/profile/${username}`)
-            return res
+            const res = await this.#fetcher.get(`${this.#prefix}/admin/profile/${username}`);
+            return res;
         } catch (error) {
-            return error.response.data
+            return error.response.data;
         }
-    }
+    };
 
     createAccount = async (profile) => {
         try {
-            const res = await this.#fetcher.post(`${this.#prefix}/create`, profile)
-            return res
+            const res = await this.#fetcher.post(`${this.#prefix}/create`, profile);
+            return res;
         } catch (error) {
-            return error.response.data
+            return error.response.data;
         }
-    }
+    };
 
     confirmedWithEmail = async (username, email) => {
         try {
-            const res = await this.#fetcher.put(`${this.#prefix}/confirmed_email`, { identifier: { username }, email })
-            return res
+            const res = await this.#fetcher.put(`${this.#prefix}/confirmed_email`, { identifier: { username }, email });
+            return res;
         } catch (error) {
-            return error.response.data
+            return error.response.data;
         }
-
-    }
+    };
 }
 
-export default new ShipperAdapter()
+export default new ShipperAdapter();
