@@ -38,12 +38,12 @@ jwt:
 
 shipper:
     api:
-        base_url: https://shipper-management-service-logpost-stag-qjrfn6j7kq-as.a.run.app
+        base_url: http://localhost:8080
         prefix_route: /shipper
 
 carrier:
     api:
-        base_url: https://carrier-management-service-logpost-stag-qjrfn6j7kq-as.a.run.app
+        base_url: http://localhost:8081
         prefix_route: /carrier
 
 frontend:
