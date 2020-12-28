@@ -40,12 +40,16 @@ router.post(`${prefix}/signup/:role`, async (req, res) => {
     responseHandler(async () => {
         const { role } = req.params;
         const profile = req.body;
+
         if (role) {
-            const data = await accountUsecase.signup(role, profile);
-            return data;
-        } else {
-            throw new Error("400 : Invalid, role is empty on param query");
+            try {
+                const data = await accountUsecase.signup(role, profile);
+                return data;
+            } catch (error) {
+                throw error;
+            }
         }
+        throw new Error("400 : Invalid, role is empty on param query");
     }, res);
 });
 

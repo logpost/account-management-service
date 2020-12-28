@@ -13,17 +13,13 @@ class AccountUsecase {
 
     signup = async (role, profile) => {
         const res = await this.fetcher.account[role].createAccount(profile);
-
         if (res.status === 200) {
             const { name, email } = profile;
             const email_token = await createEmailConfirmToken({ ...profile, role });
 
             const transporter = await NodeMailerAdapter.getInstance();
             transporter.send(name, email, role, email_token);
-            return {
-                email_token,
-                message: `Done, Message sent to ${email} success. Check your mailbox.`,
-            };
+            return { email_token };
         }
         throw new Error(res.error.message);
     };
