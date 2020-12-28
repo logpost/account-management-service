@@ -6,6 +6,14 @@ import config from "../config";
 
 const accountUsecase = new AccountUsecase();
 
+var cookieRefreshTokenExtractor = function (req) {
+    var token = null;
+    if (req && req.cookies) {
+        token = req.cookies["refresh_token"];
+    }
+    return token;
+};
+
 const options_email_rule = {
     jwtFromRequest: ExtractJwt.fromUrlQueryParameter("email_token"),
     secretOrKey: config.jwt.email_token.secret.jwt_secret,
@@ -21,7 +29,7 @@ const options_auth_rule = {
 };
 
 const options_refresh_rule = {
-    jwtFromRequest: ExtractJwt.fromBodyField("refresh_token"),
+    jwtFromRequest: cookieRefreshTokenExtractor,
     secretOrKey: config.jwt.refresh_token.secret.jwt_secret,
     issuer: config.jwt.refresh_token.options.issuer,
     audience: config.jwt.refresh_token.options.audience,

@@ -56,7 +56,7 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
 router.post(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => {
     responseHandler(async () => {
         const account = req.user;
-        const { refresh_token } = req.body;
+        const { refresh_token } = req.cookies;
         const { role } = account;
 
         if (role) {
@@ -81,7 +81,7 @@ router.post(`${prefix}/email/confirm/send`, passport.verifyEmail, async (req, re
     }, res);
 });
 
-router.get(`${prefix}/email/confirm/recive/success`, passport.verifyEmail, async (req, res) => {
+router.get(`${prefix}/email/confirm/receive/success`, passport.verifyEmail, async (req, res) => {
     const { isConfirmEmail, role, email, username } = req.user;
     if (isConfirmEmail) {
         responseSender(`200 : ${email} has been confirmed.`, res);
