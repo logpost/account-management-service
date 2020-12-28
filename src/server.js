@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import config from "./config";
 
 import RedisAdapter from "./adapters/redis.adapter";
@@ -15,6 +16,7 @@ RedisAdapter.getInstance();
 NodeMailerAdapter.getInstance();
 
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
