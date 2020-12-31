@@ -52,7 +52,7 @@ const createAccessToken = (info) => {
         expiresIn: config.jwt.access_token.options.expires_in,
         issuer: config.jwt.access_token.options.issuer,
         audience: config.jwt.access_token.options.audience,
-        subject: info.shipper_id,
+        subject: info[`${info.role}_id`], // shipper_id and carrier_id
     };
 
     const payload = {
