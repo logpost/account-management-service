@@ -25,7 +25,7 @@ jwt:
         secret:
             jwt_secret: logpostrefreshtoken
         options:
-            expires_in: 2m
+            expires_in: 10m
             issuer: logpost
             audience: logpost
     access_token:
