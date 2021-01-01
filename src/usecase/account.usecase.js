@@ -32,7 +32,7 @@ class AccountUsecase {
             if (authorized) {
                 const refresh_token = await createRefreshToken(account);
                 const access_token = await createAccessToken(account);
-                await this.refreshTokenStore.set(username, refresh_token);
+                await this.refreshTokenStore.set(refresh_token, username);
                 return [refresh_token, access_token];
             }
             throw new Error("400 : Invalid, password is not match");
@@ -41,11 +41,11 @@ class AccountUsecase {
     };
 
     generateAccessTokenFromRefreshToken = async (account, refresh_token) => {
+        // make sure this username is geting from token, didn't fetching from database
         const { username } = account;
-
         if (
-            (await this.refreshTokenStore.exists(username)) &&
-            (await this.refreshTokenStore.get(username)) === refresh_token
+            (await this.refreshTokenStore.exists(refresh_token)) &&
+            (await this.refreshTokenStore.get(refresh_token)) === username
         ) {
             const access_token = await createAccessToken(account);
             return access_token;
