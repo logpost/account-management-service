@@ -1,10 +1,12 @@
 import passport from "passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import AccountUsecase from "../usecase/account.usecase";
+import RedisAdapter from "../adapters/redis.adapter";
 import config from "../config";
 // import { checkAccountDidConfirmEmail } from "../helper/policy.handler";
 
 const accountUsecase = new AccountUsecase();
+// const drefreshTokenStore = RedisAdapter.getInstance();
 
 var cookieRefreshTokenExtractor = function (req) {
     var token = null;
@@ -41,7 +43,6 @@ passport.use(
         try {
             const { username, role } = payload;
             const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
-
             if (account) return done(null, payload);
             // this case its not test yet !!!!
             return done(null, false);
@@ -86,9 +87,12 @@ passport.use(
     "refresh_rule",
     new Strategy(options_refresh_rule, async (payload, done) => {
         try {
-            const { username, role } = payload;
+            const { role, username } = payload;
             const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
-            if (account) return done(null, account);
+            // we have to replace username's sotring in database with username's storing in token,
+            // then next step use-case will verify the username is matching on Redis
+            // (that protect when secret variable for create token is hacked)
+            if (account) return done(null, { ...account, username });
             return done(null, false);
         } catch (error) {
             return done(error, false);

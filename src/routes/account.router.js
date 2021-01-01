@@ -5,18 +5,11 @@ import AccountUsecase from "../usecase/account.usecase";
 import NodeMailerAdapter from "../adapters/nodemailer.adapter";
 import passport from "../middlewares/auth.middleware";
 import responseHandler, { responseSender } from "../helper/response.handler";
+import { expireInDays } from "../helper/cookie.handler";
 
 const prefix = "/account";
 const router = express.Router();
 const accountUsecase = new AccountUsecase();
-
-const cookie_opt = {
-    httpOnly: config.cookie.options.httpOnly,
-    domain: config.cookie.options.domain,
-    secure: config.cookie.options.secure,
-    maxAge: config.cookie.options.maxAge,
-    signed: config.cookie.options.signed,
-};
 
 router.get(`${prefix}/healthcheck`, (req, res) => {
     responseHandler(async () => {
@@ -58,8 +51,13 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
         const { role } = req.params;
         const { username, password } = req.body;
         if (role) {
+            const cookie_opts = {
+                ...config.cookie.options,
+                expires: expireInDays(config.cookie.options.expires),
+            };
             const [refresh_token, access_token] = await accountUsecase.login(role, username, password);
-            res.cookie("refresh_token", refresh_token, cookie_opt);
+
+            res.cookie("refresh_token", refresh_token, cookie_opts);
             return { access_token };
         } else {
             throw new Error("400 : Invalid, role is empty on param query");
