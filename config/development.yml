@@ -1,4 +1,5 @@
 app:
+    base_url: http://localhost:5000
     domain: localhost
     kind: development
     port: 5000
@@ -47,6 +48,7 @@ carrier:
         prefix_route: /carrier
 
 frontend:
+    base_url: http://localhost:3000
     domain: localhost
     port: 3000
 
