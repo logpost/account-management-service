@@ -7,10 +7,10 @@ app:
 cookie:
     secret: cookiesigningbylogpost
     options:
-        doamain: localhost
-        httpOnly: false
+        domain: localhost
+        httpOnly: true
         secure: false
-        maxAge: 1000000
+        expires: 14
         signed: true
 
 jwt:
@@ -25,14 +25,14 @@ jwt:
         secret:
             jwt_secret: logpostrefreshtoken
         options:
-            expires_in: 10m
+            expires_in: 14d
             issuer: logpost
             audience: logpost
     access_token:
         secret:
             jwt_secret: logpostprivateroute
         options:
-            expires_in: 1m
+            expires_in: 10m
             issuer: logpost
             audience: logpost
 

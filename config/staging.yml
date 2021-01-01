@@ -7,9 +7,11 @@ app:
 cookie:
     secret: cookiesigningbylogpost
     options:
-        domain: localhost
+        doamain: localhost
         httpOnly: true
-        secure: true
+        secure: false
+        expires: 14
+        signed: true
 
 jwt:
     email_token:
@@ -19,11 +21,18 @@ jwt:
             expires_in: 10m
             issuer: logpost
             audience: mailer
+    refresh_token:
+        secret:
+            jwt_secret: logpostrefreshtoken
+        options:
+            expires_in: 14d
+            issuer: logpost
+            audience: logpost
     access_token:
         secret:
             jwt_secret: logpostprivateroute
         options:
-            expires_in: 30d
+            expires_in: 10m
             issuer: logpost
             audience: logpost
 
@@ -46,3 +55,8 @@ nodemailer:
         gmail:
             username: logpost.bot@gmail.com
             password: logpost2020
+
+redis:
+    port: 18491
+    host: redis-18491.c228.us-central1-1.gce.cloud.redislabs.com
+    password: 3mKpjRKIKljcHG1EXRpHe9Sjivxp5UoR
