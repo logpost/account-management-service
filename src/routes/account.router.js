@@ -2,7 +2,7 @@ import express from "express";
 
 import config from "../config";
 import AccountUsecase from "../usecase/account.usecase";
-import NodeMailerAdapter from "../adapters/nodemailer.adapter";
+// import NodeMailerAdapter from "../adapters/nodemailer.adapter";
 import passport from "../middlewares/auth.middleware";
 import responseHandler, { responseSender } from "../helper/response.handler";
 import { expireInDays } from "../helper/cookie.handler";
@@ -84,22 +84,17 @@ router.post(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => 
 
 router.post(`${prefix}/email/confirm/send`, passport.verifyEmail, async (req, res) => {
     responseHandler(async () => {
-        const { isConfirmEmail, role, name, email } = req.user;
-        const { email_token } = req.params;
+        const { isConfirmEmail, ...profile } = req.user;
 
-        if (isConfirmEmail) return `200 : ${email} has been confirmed.`;
-
-        const transporter = await NodeMailerAdapter.getInstance();
-        transporter.send(name, email, role, email_token);
-        return `200 : Done, Message sent to ${email} success. Check your mailbox.`;
+        if (isConfirmEmail) responseSender(`200 : ${email} has been confirmed.`, res);
+        await accountUsecase.sendConfirmEmailAgain(profile);
+        responseSender(`200 : Done, Message sent to ${email} success. Check your mailbox.`, res);
     }, res);
 });
 
 router.get(`${prefix}/email/confirm/receive/success`, passport.verifyEmail, async (req, res) => {
     const { isConfirmEmail, role, email, username } = req.user;
-    if (isConfirmEmail) {
-        responseSender(`200 : ${email} has been confirmed.`, res);
-    }
+    if (isConfirmEmail) responseSender(`200 : ${email} has been confirmed.`, res);
 
     try {
         await accountUsecase.confirmedWithEmail(role, username, email);
