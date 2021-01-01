@@ -58,6 +58,13 @@ class AccountUsecase {
         return res;
     };
 
+    sendConfirmEmailAgain = async (profile) => {
+        const { name, email, role } = profile;
+        const transporter = await NodeMailerAdapter.getInstance();
+        const email_token = await createEmailConfirmToken(profile);
+        transporter.send(name, email, role, email_token);
+    };
+
     confirmedWithEmail = async (role, username, email) => {
         const res = await this.fetcher.account[role].confirmedWithEmail(username, email);
         return res;
