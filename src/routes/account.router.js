@@ -103,7 +103,7 @@ router.get(`${prefix}/email/confirm/receive/success`, passport.verifyEmail, asyn
 
     try {
         await accountUsecase.confirmedWithEmail(role, username, email);
-        res.redirect("https://google.com");
+        res.redirect(`${config.frontend.base_url}/alert/success`);
     } catch (error) {
         responseSender(new Error(error), res);
     }

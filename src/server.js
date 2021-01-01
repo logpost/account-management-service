@@ -10,7 +10,7 @@ import AccountRoute from "./routes/account.router";
 const app = express();
 
 const port = process.env.PORT || config.app.port;
-const domain = config.app.domain;
+const base_url = config.app.base_url;
 const kind = config.app.kind;
 
 RedisAdapter.getInstance();
@@ -25,6 +25,6 @@ app.use("/", AccountRoute);
 
 app.listen(port, () => {
     console.log(`Account Management Service 👨🏼‍💻👩🏾‍💻`);
-    console.log(`Listening on the http://${domain}:${port} 🌟`);
+    console.log(`Listening on the ${base_url} 🌟`);
     console.log(`Working on ${kind.toUpperCase()} ENVIRONMENT 👻`);
 });
