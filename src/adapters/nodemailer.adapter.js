@@ -54,7 +54,7 @@ class NodeMailerAdapter {
                 name,
                 email,
                 role,
-                `http://${config.app.domain}:${config.app.port}/account/email/confirm/receive/success?email_token=${email_token}`
+                `${config.app.base_url}/account/email/confirm/receive/success?email_token=${email_token}`
             ),
         });
         // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
