@@ -14,6 +14,7 @@ docker-build-push:
 	make docker-push;
 
 hand-deploy-to-stag-step-1:
+	git push -u origin develop; \
 	git checkout stag-release; \
 	git pull origin develop;
 hand-deploy-to-stag-step-2:
