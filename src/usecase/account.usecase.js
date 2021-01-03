@@ -35,9 +35,17 @@ class AccountUsecase {
                 await this.refreshTokenStore.set(refresh_token, username);
                 return [refresh_token, access_token];
             }
-            throw new Error("400 : Invalid, password is not match");
+            throw new Error("400 : Invalid, password is not match.");
         }
         throw new Error(res.error.message);
+    };
+
+    logout = async (refresh_token) => {
+        if (await this.refreshTokenStore.exists(refresh_token)) {
+            await this.refreshTokenStore.del(refresh_token);
+            return "202 : Logout success, Your refresh_token is deleted";
+        }
+        throw new Error("404 : Your refresh_token is not exist.");
     };
 
     generateAccessTokenFromRefreshToken = async (account, refresh_token) => {
@@ -50,7 +58,7 @@ class AccountUsecase {
             const access_token = await createAccessToken(account);
             return access_token;
         }
-        throw new Error("Your refresh_token is not valid.");
+        throw new Error("400 : Your refresh_token is not valid.");
     };
 
     adminFindAccountByUsername = async (role, username) => {

@@ -65,6 +65,16 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
     }, res);
 });
 
+router.post(`${prefix}/logout`, passport.verifyRefreshToken, async (req, res) => {
+    responseHandler(async () => {
+        const { refresh_token } = req.signedCookies;
+        if (refresh_token) {
+            return await accountUsecase.logout(refresh_token);
+        }
+        throw new Error("400 : Invalid, Cookie is invalid");
+    }, res);
+});
+
 router.post(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => {
     responseHandler(async () => {
         const account = req.user;
