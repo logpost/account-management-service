@@ -44,7 +44,6 @@ passport.use(
             const { username, role } = payload;
             const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
             if (account) return done(null, payload);
-            // this case its not test yet !!!!
             return done(null, false);
         } catch (error) {
             return done(error, false);
