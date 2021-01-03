@@ -79,7 +79,7 @@ class AccountUsecase {
     };
 
     createService = async (service_name) => {
-        const payload = { username: service_name };
+        const payload = { username: service_name, isConfirmEmail: true, role: "srv" };
         const claims = {
             issuer: service_name,
             audience: service_name,
