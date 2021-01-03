@@ -2,7 +2,7 @@ app:
     domain: localhost
     kind: production
     port: 5000
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwiaWF0IjoxNjAzOTA3NzY5LCJhdWQiOiJhY2NvdW50LW1hbmFnZW1lbnQtc2VydmljZSIsImlzcyI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwic3ViIjoiYWNjb3VudC1tYW5hZ2VtZW50LXNlcnZpY2UifQ.-DTe2a_5_ESzW8Cqh-SIqPP2wws8z-8DflgbbKKAgy4
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwiaXNDb25maXJtRW1haWwiOnRydWUsInJvbGUiOiJzcnYiLCJpYXQiOjE2MDk2NzAxOTUsImF1ZCI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwiaXNzIjoiYWNjb3VudC1tYW5hZ2VtZW50LXNlcnZpY2UiLCJzdWIiOiJhY2NvdW50LW1hbmFnZW1lbnQtc2VydmljZSJ9.2XXUaOp_V28yHmtRZ0HLOiZVtViFW0Mcp42LIeTrwuw
 
 cookie:
     secret: cookiesigningbylogpost
@@ -10,6 +10,8 @@ cookie:
         doamain: localhost
         httpOnly: true
         secure: true
+        expires: 14
+        signed: true
 
 jwt:
     email_token:
@@ -19,11 +21,18 @@ jwt:
             expires_in: 10m
             issuer: logpost
             audience: mailer
+    refresh_token:
+        secret:
+            jwt_secret: logpostrefreshtoken
+        options:
+            expires_in: 14d
+            issuer: logpost
+            audience: logpost
     access_token:
         secret:
             jwt_secret: logpostprivateroute
         options:
-            expires_in: 30d
+            expires_in: 10m
             issuer: logpost
             audience: logpost
 
@@ -38,6 +47,7 @@ carrier:
         prefix_route: /carrier
 
 frontend:
+    base_url: http://localhost:3000
     domain: localhost
     port: 3000
 
@@ -46,3 +56,8 @@ nodemailer:
         gmail:
             username: logpost.bot@gmail.com
             password: logpost2020
+
+redis:
+    port: 18491
+    host: redis-18491.c228.us-central1-1.gce.cloud.redislabs.com
+    password: 3mKpjRKIKljcHG1EXRpHe9Sjivxp5UoR
