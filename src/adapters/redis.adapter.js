@@ -42,7 +42,6 @@ class RedisAdapter {
 
     async del(key) {
         await this.#refreshTokenStore.del(key);
-        console.log(`${key} is deleted !`);
     }
 
     async get(key) {
