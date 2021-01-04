@@ -14,7 +14,7 @@ class CarrierAdapter {
 
     adminFindAccountByUsername = async (username) => {
         try {
-            const res = await this.#fetcher.get(`${this.#prefix}/admin/profile/${username}`);
+            const res = await this.#fetcher.get(`${this.#prefix}/srv/profile/${username}`);
             return res;
         } catch (error) {
             return error.response.data;
