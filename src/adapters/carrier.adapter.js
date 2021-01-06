@@ -32,7 +32,7 @@ class CarrierAdapter {
 
     confirmedWithEmail = async (username, email) => {
         try {
-            const res = await this.#fetcher.put(`${this.#prefix}/srv/confirmed_email`, {
+            const res = await this.#fetcher.put(`${this.#prefix}/srv/confirmed/email`, {
                 identifier: { username },
                 email,
             });
