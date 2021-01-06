@@ -2,7 +2,7 @@ import express from "express";
 
 import config from "../config";
 import AccountUsecase from "../usecase/account.usecase";
-// import NodeMailerAdapter from "../adapters/nodemailer.adapter";
+
 import passport from "../middlewares/auth.middleware";
 import responseHandler, { responseSender } from "../helper/response.handler";
 import { expireInDays } from "../helper/cookie.handler";
@@ -117,7 +117,6 @@ router.get(`${prefix}/email/confirm/receive/success`, passport.verifyEmail, asyn
 router.get(`${prefix}/create/service/:service_name`, async (req, res) => {
     responseHandler(async () => {
         const { service_name } = req.params;
-        console.log(service_name);
         const token_service = await accountUsecase.createService(service_name);
         return { token_service };
     }, res);
