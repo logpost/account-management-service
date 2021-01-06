@@ -1,7 +1,7 @@
 import passport from "passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import AccountUsecase from "../usecase/account.usecase";
-import RedisAdapter from "../adapters/redis.adapter";
+// import RedisAdapter from "../adapters/redis.adapter";
 import config from "../config";
 // import { checkAccountDidConfirmEmail } from "../helper/policy.handler";
 
@@ -46,6 +46,7 @@ passport.use(
             if (account) return done(null, payload);
             return done(null, false);
         } catch (error) {
+            console.log(error);
             return done(error, false);
         }
     })
@@ -61,21 +62,14 @@ passport.use(
             if (account) {
                 const user = {
                     isConfirmEmail: false,
-                    shipper_id: account._id,
-                    username: account.username,
-                    name: account.name,
-                    display_name: account.display_name,
-                    email: account.email,
-                    account_type: account.account_type,
+                    ...account,
                     role,
                 };
 
                 if (account.email !== "not_confirm") user.isConfirmEmail = true;
-
                 return done(null, user);
-            } else {
-                return done(null, false);
             }
+            return done(null, false);
         } catch (error) {
             return done(error, false);
         }
