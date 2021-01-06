@@ -33,6 +33,10 @@ class AccountUsecase {
                 const refresh_token = await createRefreshToken(account);
                 const access_token = await createAccessToken(account);
                 await this.refreshTokenStore.set(refresh_token, username);
+                if (account.email === "not_confirm") {
+                    const email_token = await createEmailConfirmToken({ ...account, role });
+                    return [refresh_token, access_token, email_token];
+                }
                 return [refresh_token, access_token];
             }
             throw new Error("400 : Invalid, password is not match.");
