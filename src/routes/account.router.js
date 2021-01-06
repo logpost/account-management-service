@@ -55,9 +55,12 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
                 ...config.cookie.options,
                 expires: expireInDays(config.cookie.options.expires),
             };
-            const [refresh_token, access_token] = await accountUsecase.login(role, username, password);
+            const [refresh_token, access_token, email_token] = await accountUsecase.login(role, username, password);
 
             res.cookie("refresh_token", refresh_token, cookie_opts);
+            if (email_token) {
+                access_token, email_token;
+            }
             return { access_token };
         } else {
             throw new Error("400 : Invalid, role is empty on param query");
@@ -92,13 +95,23 @@ router.post(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => 
     }, res);
 });
 
-router.post(`${prefix}/email/confirm/send`, passport.verifyEmail, async (req, res) => {
+router.post(`${prefix}/guest/email/confirm/send`, passport.verifyEmail, async (req, res) => {
     responseHandler(async () => {
         const { isConfirmEmail, ...profile } = req.user;
-
-        if (isConfirmEmail) responseSender(`200 : ${email} has been confirmed.`, res);
+        const { email } = profile;
+        if (isConfirmEmail) return `200 : ${email} has been confirmed.`;
         await accountUsecase.sendConfirmEmailAgain(profile);
-        responseSender(`200 : Done, Message sent to ${email} success. Check your mailbox.`, res);
+        return `200 : Done, Message sent to ${email} success. Check your mailbox.`;
+    }, res);
+});
+
+router.post(`${prefix}/logposter/email/confirm/send`, passport.verifyAuth, async (req, res) => {
+    responseHandler(async () => {
+        const { isConfirmEmail, ...profile } = req.user;
+        const { email } = req.body;
+        if (isConfirmEmail) return `200 : ${email} has been confirmed.`;
+        await accountUsecase.sendConfirmEmailAgain({ ...profile, email });
+        return `200 : Done, Message sent to ${email} success. Check your mailbox.`;
     }, res);
 });
 
