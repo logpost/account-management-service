@@ -23,7 +23,7 @@ class CarrierAdapter {
 
     createAccount = async (profile) => {
         try {
-            const res = await this.#fetcher.post(`${this.#prefix}/create`, profile);
+            const res = await this.#fetcher.post(`${this.#prefix}/srv/create`, profile);
             return res;
         } catch (error) {
             return error.response.data;
@@ -32,7 +32,10 @@ class CarrierAdapter {
 
     confirmedWithEmail = async (username, email) => {
         try {
-            const res = await this.#fetcher.put(`${this.#prefix}/confirmed_email`, { identifier: { username }, email });
+            const res = await this.#fetcher.put(`${this.#prefix}/srv/confirmed_email`, {
+                identifier: { username },
+                email,
+            });
             return res;
         } catch (error) {
             return error.response.data;
