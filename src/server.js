@@ -16,7 +16,7 @@ const kind = config.app.kind;
 RedisAdapter.getInstance();
 NodeMailerAdapter.getInstance();
 
-app.use(cors());
+app.use(cors({ credentials: true, exposedHeaders: ["Set-Cookie"] }));
 app.use(cookieParser(config.cookie.secret));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
