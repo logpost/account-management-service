@@ -1,5 +1,5 @@
 import express from "express";
-
+import jwt from "jsonwebtoken";
 import config from "../config";
 import AccountUsecase from "../usecase/account.usecase";
 
@@ -95,14 +95,29 @@ router.post(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => 
     }, res);
 });
 
-router.post(`${prefix}/guest/email/confirm/send`, passport.verifyEmail, async (req, res) => {
-    responseHandler(async () => {
-        const { isConfirmEmail, ...profile } = req.user;
-        const { email } = profile;
-        if (isConfirmEmail) return `200 : ${email} has been confirmed.`;
-        await accountUsecase.sendConfirmEmailAgain(profile);
-        return `200 : Done, Message sent to ${email} success. Check your mailbox.`;
-    }, res);
+router.post(`${prefix}/guest/email/confirm/send`, async (req, res) => {
+    try {
+        const { email_token } = req.query;
+        const decoded = jwt.verify(email_token, config.jwt.email_token.secret.jwt_secret);
+        const { role, username, email } = decoded;
+        const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
+        if (account) {
+            if (account.email === "not_confirm") {
+                await accountUsecase.sendConfirmEmailAgain({ ...account, email });
+                return responseSender(`200 : Done, Message sent to ${email} success. Check your mailbox.`, res);
+            }
+            responseSender(new Error("404 : Your account has been confirmed."), res);
+        }
+        responseSender(new Error("404 : Your account is not exist."), res);
+    } catch (error) {
+        if (error.name === "TokenExpiredError") {
+            res.redirect(`${config.frontend.base_url}/login/100`);
+        } else if (error.name === "JsonWebTokenError") {
+            res.redirect(`${config.frontend.base_url}/login/200`);
+        } else {
+            responseSender(new Error(error.message), res);
+        }
+    }
 });
 
 router.post(`${prefix}/logposter/email/confirm/send`, passport.verifyAuth, async (req, res) => {
