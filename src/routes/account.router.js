@@ -111,9 +111,9 @@ router.post(`${prefix}/guest/email/confirm/send`, async (req, res) => {
         responseSender(new Error("404 : Your account is not exist."), res);
     } catch (error) {
         if (error.name === "TokenExpiredError") {
-            res.redirect(`${config.frontend.base_url}/login/100`);
+            res.redirect(`${config.frontend.base_url}/login?redirectCode=100`);
         } else if (error.name === "JsonWebTokenError") {
-            res.redirect(`${config.frontend.base_url}/login/200`);
+            res.redirect(`${config.frontend.base_url}/login?redirectCode=200`);
         } else {
             responseSender(new Error(error.message), res);
         }
