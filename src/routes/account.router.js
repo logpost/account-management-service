@@ -78,7 +78,7 @@ router.post(`${prefix}/logout`, passport.verifyRefreshToken, async (req, res) =>
     }, res);
 });
 
-router.post(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => {
+router.get(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => {
     responseHandler(async () => {
         const account = req.user;
         const { refresh_token } = req.signedCookies;
