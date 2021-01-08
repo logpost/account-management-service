@@ -85,6 +85,7 @@ passport.use(
             // we have to replace username's sotring in database with username's storing in token,
             // then next step use-case will verify the username is matching on Redis
             // (that protect when secret variable for create token is hacked)
+            console.log(account)
             if (account) return done(null, { ...account, username });
             return done(null, false);
         } catch (error) {
