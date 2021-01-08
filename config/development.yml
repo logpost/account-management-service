@@ -8,7 +8,7 @@ app:
 cookie:
     secret: cookiesigningbylogpost
     options:
-        domain: localhost
+        domain: http://localhost:3000
         httpOnly: true
         secure: false
         expires: 14
