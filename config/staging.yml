@@ -8,11 +8,12 @@ app:
 cookie:
     secret: cookiesigningbylogpost
     options:
-        doamain: localhost
+        domain: false
         httpOnly: true
-        secure: false
+        secure: true
         expires: 14
         signed: true
+        sameSite: None
 
 jwt:
     email_token:
