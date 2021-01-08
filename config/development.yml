@@ -13,6 +13,7 @@ cookie:
         secure: false
         expires: 14
         signed: true
+        samesite: None
 
 jwt:
     email_token:
