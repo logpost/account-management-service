@@ -5,6 +5,11 @@ app:
     port: 5000
     token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwiaXNDb25maXJtRW1haWwiOnRydWUsInJvbGUiOiJzcnYiLCJpYXQiOjE2MDk2NzAxOTUsImF1ZCI6ImFjY291bnQtbWFuYWdlbWVudC1zZXJ2aWNlIiwiaXNzIjoiYWNjb3VudC1tYW5hZ2VtZW50LXNlcnZpY2UiLCJzdWIiOiJhY2NvdW50LW1hbmFnZW1lbnQtc2VydmljZSJ9.2XXUaOp_V28yHmtRZ0HLOiZVtViFW0Mcp42LIeTrwuw
 
+cors:
+    origin: ["http://127.0.0.1:3000", "https://logpost.netlify.app"]
+    credentials: true
+    exposedHeaders: ["set-cookie"]
+
 cookie:
     secret: cookiesigningbylogpost
     options:
