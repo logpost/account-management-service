@@ -54,8 +54,8 @@ carrier:
         prefix_route: /carrier
 
 frontend:
-    base_url: http://localhost:3000
-    domain: localhost
+    base_url: https://logpost.netlify.app
+    domain: logpost.netlify.app
     port: 3000
 
 nodemailer:
