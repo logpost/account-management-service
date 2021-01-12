@@ -29,6 +29,14 @@ router.get(`${prefix}/healthcheck/token/private`, passport.verifyAuth, async (re
     }, res);
 });
 
+router.get(`${prefix}/srv/create/service/:service_name`, async (req, res) => {
+    responseHandler(async () => {
+        const { service_name } = req.params;
+        const token_service = await accountUsecase.createService(service_name);
+        return { token_service };
+    }, res);
+});
+
 router.post(`${prefix}/signup/:role`, async (req, res) => {
     responseHandler(async () => {
         const { role } = req.params;
@@ -55,13 +63,21 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
                 ...config.cookie.options,
                 expires: expireInDays(config.cookie.options.expires),
             };
+
             const [refresh_token, access_token, email_token] = await accountUsecase.login(role, username, password);
 
-            res.cookie("refresh_token", refresh_token, cookie_opts);
-            if (email_token) {
-                access_token, email_token;
+            if (email_token && refresh_token && access_token) {
+                res.cookie("refresh_token", refresh_token, cookie_opts);
+                return {
+                    access_token,
+                    email_token,
+                };
+            } else if (access_token && refresh_token) {
+                res.cookie("refresh_token", refresh_token, cookie_opts);
+                return { access_token };
+            } else {
+                throw new Error("500 : Account service isn't alive.");
             }
-            return { access_token };
         } else {
             throw new Error("400 : Invalid, role is empty on param query");
         }
@@ -95,12 +111,37 @@ router.get(`${prefix}/token`, passport.verifyRefreshToken, async (req, res) => {
     }, res);
 });
 
+router.put(`${prefix}/change/password`, passport.verifyAuth, async (req, res) => {
+    responseHandler(async () => {
+        try {
+            const profile = req.user;
+            const data = req.body;
+            return await accountUsecase.changePassword(profile, data);
+        } catch (error) {
+            throw error;
+        }
+    }, res);
+});
+
+router.put(`${prefix}/change/email`, passport.verifyAuth, async (req, res) => {
+    responseHandler(async () => {
+        try {
+            const { isConfirmEmail, ...profile } = req.user;
+            const { email } = req.body;
+            await accountUsecase.sendEmailForChangeEmail({ ...profile, email });
+            return `200 : Done, Message sent to ${email} success. Check your mailbox.`;
+        } catch (error) {
+            throw error;
+        }
+    }, res);
+});
+
 router.post(`${prefix}/guest/email/confirm/send`, async (req, res) => {
     try {
         const { email_token } = req.query;
         const decoded = jwt.verify(email_token, config.jwt.email_token.secret.jwt_secret);
         const { role, username, email } = decoded;
-        const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
+        const { data: account } = await accountUsecase.findAccountByUsername(role, username);
         if (account) {
             if (account.email === "not_confirm") {
                 await accountUsecase.sendConfirmEmailAgain({ ...account, email });
@@ -136,18 +177,20 @@ router.get(`${prefix}/email/confirm/receive/success`, passport.verifyEmail, asyn
 
     try {
         await accountUsecase.confirmedWithEmail(role, username, email);
-        res.redirect(`${config.frontend.base_url}/alert/success`);
+        res.redirect(`${config.frontend.base_url}/alert/success?type=100`);
     } catch (error) {
         responseSender(new Error(error), res);
     }
 });
 
-router.get(`${prefix}/create/service/:service_name`, async (req, res) => {
-    responseHandler(async () => {
-        const { service_name } = req.params;
-        const token_service = await accountUsecase.createService(service_name);
-        return { token_service };
-    }, res);
+router.get(`${prefix}/email/change/receive/success`, passport.verifyEmail, async (req, res) => {
+    const { role, email, username } = req.user;
+    try {
+        await accountUsecase.changeEmailWithEmail(role, username, email);
+        res.redirect(`${config.frontend.base_url}/alert/success?type=200`);
+    } catch (error) {
+        responseSender(new Error(error), res);
+    }
 });
 
 export default router;

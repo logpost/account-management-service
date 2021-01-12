@@ -12,9 +12,18 @@ class ShipperAdapter {
         },
     });
 
-    adminFindAccountByUsername = async (username) => {
+    findAccountByUsername = async (username) => {
         try {
             const res = await this.#fetcher.get(`${this.#prefix}/srv/profile/${username}`);
+            return res;
+        } catch (error) {
+            return error.response.data;
+        }
+    };
+
+    updateAccounProfiletByUsername = async (identifier, profile) => {
+        try {
+            const res = await this.#fetcher.put(`${this.#prefix}/srv/profile/update`, { identifier, profile });
             return res;
         } catch (error) {
             return error.response.data;

@@ -5,8 +5,8 @@ import AccountFactory from "../factorys/account.factory";
 import config from "../config";
 
 import { compareHashed } from "../helper/hashing.handler";
-
 import { createEmailConfirmToken, createAccessToken, createRefreshToken } from "../helper/token.handler";
+
 class AccountUsecase {
     fetcher = new AccountFactory();
     refreshTokenStore = RedisAdapter.getInstance();
@@ -18,30 +18,37 @@ class AccountUsecase {
             const email_token = await createEmailConfirmToken({ ...profile, role });
 
             const transporter = await NodeMailerAdapter.getInstance();
-            transporter.send(name, email, role, email_token);
+            transporter.send(name, email, role, email_token, "confirm_email");
             return { email_token };
         }
         throw new Error(res.error.message);
     };
 
     login = async (role, username, password) => {
-        const res = await this.fetcher.account[role].adminFindAccountByUsername(username);
-        const { data: account } = res;
-        if (account) {
-            const authorized = await compareHashed(password, account.password);
-            if (authorized) {
-                const refresh_token = await createRefreshToken(account);
-                const access_token = await createAccessToken(account);
-                await this.refreshTokenStore.set(refresh_token, username);
-                if (account.email === "not_confirm") {
-                    const email_token = await createEmailConfirmToken({ ...account, role });
-                    return [refresh_token, access_token, email_token];
+        try {
+            const res = await this.fetcher.account[role].findAccountByUsername(username);
+            if (res) {
+                const { data: account } = res;
+                if (account) {
+                    const authorized = await compareHashed(password, account.password);
+                    if (authorized) {
+                        const refresh_token = createRefreshToken(account);
+                        const access_token = createAccessToken(account);
+                        await this.refreshTokenStore.set(refresh_token, username);
+                        if (account.email === "not_confirm") {
+                            const email_token = createEmailConfirmToken({ ...account, role });
+                            return [refresh_token, access_token, email_token];
+                        }
+                        return [refresh_token, access_token];
+                    }
+                    throw new Error("400 : Invalid, password is not match.");
                 }
-                return [refresh_token, access_token];
+                throw new Error(res.error.message);
             }
-            throw new Error("400 : Invalid, password is not match.");
+        } catch (error) {
+            if (error.message) throw new Error(error.message);
+            else throw new Error("500 : Adapter isn't alive.");
         }
-        throw new Error(res.error.message);
     };
 
     logout = async (refresh_token) => {
@@ -65,20 +72,72 @@ class AccountUsecase {
         throw new Error("400 : Your refresh_token is not valid.");
     };
 
-    adminFindAccountByUsername = async (role, username) => {
-        const res = await this.fetcher.account[role].adminFindAccountByUsername(username);
-        return res;
+    changePassword = async (profile, data) => {
+        const { username, role } = profile;
+        const { old_password, password } = data;
+        try {
+            const res = await this.fetcher.account[role].findAccountByUsername(username);
+            const { data: account } = res;
+            if (account) {
+                const authorized = await compareHashed(old_password, account.password);
+                if (authorized) {
+                    const res = await this.fetcher.account[role].updateAccounProfiletByUsername(
+                        { username },
+                        { password }
+                    );
+                    if (res.status === 200) {
+                        return `204 : Updated password successfully`;
+                    }
+                    throw new Error("500 : Adapter isn't alive.");
+                }
+                throw new Error("400 : Invalid, password is not match.");
+            }
+            throw new Error("404 : Your account didn't exist.");
+        } catch (error) {
+            if (error.message) throw new Error(error.message);
+            else throw new Error("500 : Adapter isn't alive.");
+        }
+    };
+
+    sendEmailForChangeEmail = async (profile) => {
+        const { name, email, role } = profile;
+        const transporter = await NodeMailerAdapter.getInstance();
+        const email_token = createEmailConfirmToken(profile);
+        transporter.send(name, email, role, email_token, "change_email");
     };
 
     sendConfirmEmailAgain = async (profile) => {
         const { name, email, role } = profile;
         const transporter = await NodeMailerAdapter.getInstance();
-        const email_token = await createEmailConfirmToken(profile);
-        transporter.send(name, email, role, email_token);
+        const email_token = createEmailConfirmToken(profile);
+        transporter.send(name, email, role, email_token, "confirm_email");
+    };
+
+    changeEmailWithEmail = async (role, username, email) => {
+        try {
+            const res = await this.fetcher.account[role].findAccountByUsername(username);
+            const { data: account } = res;
+            if (account) {
+                const res = await this.fetcher.account[role].updateAccounProfiletByUsername({ username }, { email });
+                if (res.status === 200) {
+                    return `204 : Updated email successfully`;
+                }
+                throw new Error("500 : Adapter isn't alive.");
+            }
+            throw new Error("404 : Your account didn't exist.");
+        } catch (error) {
+            if (error.message) throw new Error(error.message);
+            else throw new Error("500 : Adapter isn't alive.");
+        }
     };
 
     confirmedWithEmail = async (role, username, email) => {
         const res = await this.fetcher.account[role].confirmedWithEmail(username, email);
+        return res;
+    };
+
+    findAccountByUsername = async (role, username) => {
+        const res = await this.fetcher.account[role].findAccountByUsername(username);
         return res;
     };
 
