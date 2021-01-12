@@ -42,7 +42,7 @@ passport.use(
     new Strategy(options_email_rule, async (payload, done) => {
         try {
             const { username, role } = payload;
-            const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
+            const { data: account } = await accountUsecase.findAccountByUsername(role, username);
             if (account) return done(null, payload);
             return done(null, false);
         } catch (error) {
@@ -57,7 +57,7 @@ passport.use(
     new Strategy(options_auth_rule, async (payload, done) => {
         try {
             const { username, role } = payload;
-            const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
+            const { data: account } = await accountUsecase.findAccountByUsername(role, username);
 
             if (account) {
                 const user = {
@@ -81,11 +81,11 @@ passport.use(
     new Strategy(options_refresh_rule, async (payload, done) => {
         try {
             const { role, username } = payload;
-            const { data: account } = await accountUsecase.adminFindAccountByUsername(role, username);
+            const { data: account } = await accountUsecase.findAccountByUsername(role, username);
             // we have to replace username's sotring in database with username's storing in token,
             // then next step use-case will verify the username is matching on Redis
             // (that protect when secret variable for create token is hacked)
-            console.log(account)
+            console.log(account);
             if (account) return done(null, { ...account, username });
             return done(null, false);
         } catch (error) {
