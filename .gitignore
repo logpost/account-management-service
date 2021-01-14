@@ -1,4 +1,6 @@
 .vscode
 node_modules
 dist
-/config
+/config/development.yml
+/config/production.yml
+/config/staging.yml
