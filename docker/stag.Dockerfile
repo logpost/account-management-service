@@ -4,7 +4,6 @@ WORKDIR /usr/src/app
 
 ARG GIT_ACCESS_TOKEN_CURL_CONFIG
 
-
 COPY package*.json ./
 COPY src src/ 
 COPY config config/
