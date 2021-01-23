@@ -4,10 +4,9 @@ WORKDIR /usr/src/app
 
 ARG GIT_ACCESS_TOKEN_CURL_CONFIG
 
-COPY package*.json ./
+COPY *.sh *.json *.js Makefile ./
 COPY src src/ 
 COPY config config/
-COPY .babelrc ./
 
 RUN curl -o production.yml https://${GIT_ACCESS_TOKEN_CURL_CONFIG}@raw.githubusercontent.com/logpost/logpost-environment/master/environment/account-management-service/production.yml
 RUN curl -o development.yml https://${GIT_ACCESS_TOKEN_CURL_CONFIG}@raw.githubusercontent.com/logpost/logpost-environment/master/environment/account-management-service/development.yml
