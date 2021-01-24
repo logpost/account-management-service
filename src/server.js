@@ -12,7 +12,7 @@ if (process.env.NODE_ENV === "staging") {
     Profiler.start({
         projectId: "logpost-298506",
         serviceContext: {
-            service: "jobs-management-service",
+            service: "account-management-service",
             version: "1.0.0",
         },
     });
