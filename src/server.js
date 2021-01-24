@@ -1,3 +1,4 @@
+import * as Profiler from "@google-cloud/profiler";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -6,6 +7,16 @@ import config from "./config";
 import RedisAdapter from "./adapters/redis.adapter";
 import NodeMailerAdapter from "./adapters/nodemailer.adapter";
 import AccountRoute from "./routes/account.router";
+
+if (process.env.NODE_ENV === "staging") {
+    Profiler.start({
+        projectId: "logpost-298506",
+        serviceContext: {
+            service: "jobs-management-service",
+            version: "1.0.0",
+        },
+    });
+}
 
 const app = express();
 
