@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import config from "../config";
 // import RedisAdapter from "../adapters/redis.adapter";
-import { checkAccountDidConfirmEmail } from "./policy.handler";
 
 // const refreshTokenStore = RedisAdapter.getInstance();
 
@@ -56,7 +55,7 @@ const createAccessToken = (info) => {
     };
 
     const payload = {
-        isConfirmEmail: checkAccountDidConfirmEmail(info.email),
+        isConfirmEmail: info.is_email_confirmed,
         username: info.username,
         display_name: info.display_name,
         account_type: info.account_type,

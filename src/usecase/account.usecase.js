@@ -12,21 +12,31 @@ class AccountUsecase {
     refreshTokenStore = RedisAdapter.getInstance();
 
     signup = async (role, profile) => {
+        let isOAuth2Signup = false;
+
+        if (profile?.oauth2?.line?.user_id) {
+            isOAuth2Signup = true;
+            profile.is_email_confirmed = true;
+        }
+
         const res = await this.fetcher.account[role].createAccount(profile);
         if (res.status === 200) {
             const { name, email } = profile;
-            const email_token = await createEmailConfirmToken({ ...profile, role });
-
-            const transporter = await NodeMailerAdapter.getInstance();
-            transporter.send(name, email, role, email_token, "confirm_email");
-            return { email_token };
+            if (isOAuth2Signup) {
+                return `201 : Signup with OAuth2 successfully.`;
+            } else {
+                const email_token = createEmailConfirmToken({ ...profile, role });
+                const transporter = await NodeMailerAdapter.getInstance();
+                transporter.send(name, email, role, email_token, "confirm_email");
+                return { email_token };
+            }
         }
         throw new Error(res.error.message);
     };
 
     login = async (role, username, password) => {
         try {
-            const res = await this.fetcher.account[role].findAccountByUsername(username);
+            const res = await this.fetcher.account[role].findAccountByIdentifier(username, "username");
             if (res) {
                 const { data: account } = res;
                 if (account) {
@@ -35,7 +45,7 @@ class AccountUsecase {
                         const refresh_token = createRefreshToken(account);
                         const access_token = createAccessToken(account);
                         await this.refreshTokenStore.set(refresh_token, username);
-                        if (account.email === "not_confirm") {
+                        if (account.is_email_confirmed) {
                             const email_token = createEmailConfirmToken({ ...account, role });
                             return [refresh_token, access_token, email_token];
                         }
@@ -49,6 +59,17 @@ class AccountUsecase {
             if (error.message) throw new Error(error.message);
             else throw new Error("500 : Adapter isn't alive.");
         }
+    };
+
+    OAuth2 = async (profile) => {
+        if (profile) {
+            const { username } = profile;
+            const refresh_token = createRefreshToken(profile);
+            const access_token = createAccessToken(profile);
+            await this.refreshTokenStore.set(refresh_token, username);
+            return [refresh_token, access_token];
+        }
+        throw new Error(`404 : Your infomation is not valid.`);
     };
 
     logout = async (refresh_token) => {
@@ -66,7 +87,7 @@ class AccountUsecase {
             (await this.refreshTokenStore.exists(refresh_token)) &&
             (await this.refreshTokenStore.get(refresh_token)) === username
         ) {
-            const access_token = await createAccessToken(account);
+            const access_token = createAccessToken(account);
             return access_token;
         }
         throw new Error("400 : Your refresh_token is not valid.");
@@ -76,7 +97,7 @@ class AccountUsecase {
         const { username, role } = profile;
         const { old_password, password } = data;
         try {
-            const res = await this.fetcher.account[role].findAccountByUsername(username);
+            const res = await this.fetcher.account[role].findAccountByIdentifier(username, "username");
             const { data: account } = res;
             if (account) {
                 const authorized = await compareHashed(old_password, account.password);
@@ -115,7 +136,7 @@ class AccountUsecase {
 
     changeEmailWithEmail = async (role, username, email) => {
         try {
-            const res = await this.fetcher.account[role].findAccountByUsername(username);
+            const res = await this.fetcher.account[role].findAccountByIdentifier(username, "username");
             const { data: account } = res;
             if (account) {
                 const res = await this.fetcher.account[role].updateAccounProfiletByUsername({ username }, { email });
@@ -131,13 +152,13 @@ class AccountUsecase {
         }
     };
 
-    confirmedWithEmail = async (role, username, email) => {
-        const res = await this.fetcher.account[role].confirmedWithEmail(username, email);
+    confirmedWithEmail = async (role, username) => {
+        const res = await this.fetcher.account[role].confirmedWithEmail(username);
         return res;
     };
 
-    findAccountByUsername = async (role, username) => {
-        const res = await this.fetcher.account[role].findAccountByUsername(username);
+    findAccountByIdentifier = async (role, identifier, field) => {
+        const res = await this.fetcher.account[role].findAccountByIdentifier(identifier, field);
         return res;
     };
 

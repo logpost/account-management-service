@@ -1,17 +1,17 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import config from "../config";
-import AccountUsecase from "../usecase/account.usecase";
 
-import passport from "../middlewares/auth.middleware";
+import config from "../config";
+import { cookieOptions } from "../helper/cookie.handler";
 import responseHandler, { responseSender } from "../helper/response.handler";
-import { expireInDays } from "../helper/cookie.handler";
+import passport from "../middlewares/auth.middleware";
+import AccountUsecase from "../usecase/account.usecase";
 
 const prefix = "/account";
 const router = express.Router();
 const accountUsecase = new AccountUsecase();
 
-router.get(`${prefix}/healthcheck`, (req, res) => {
+router.get(`${prefix}/healthcheck`, (_, res) => {
     responseHandler(async () => {
         return "Server is alive.";
     }, res);
@@ -59,21 +59,16 @@ router.post(`${prefix}/login/:role`, async (req, res) => {
         const { role } = req.params;
         const { username, password } = req.body;
         if (role) {
-            const cookie_opts = {
-                ...config.cookie.options,
-                expires: expireInDays(config.cookie.options.expires),
-            };
-
             const [refresh_token, access_token, email_token] = await accountUsecase.login(role, username, password);
 
             if (email_token && refresh_token && access_token) {
-                res.cookie("refresh_token", refresh_token, cookie_opts);
+                res.cookie("refresh_token", refresh_token, cookieOptions);
                 return {
                     access_token,
                     email_token,
                 };
             } else if (access_token && refresh_token) {
-                res.cookie("refresh_token", refresh_token, cookie_opts);
+                res.cookie("refresh_token", refresh_token, cookieOptions);
                 return { access_token };
             } else {
                 throw new Error("500 : Account service isn't alive.");
@@ -141,13 +136,15 @@ router.post(`${prefix}/guest/email/confirm/send`, async (req, res) => {
         const { email_token } = req.query;
         const decoded = jwt.verify(email_token, config.jwt.email_token.secret.jwt_secret);
         const { role, username, email } = decoded;
-        const { data: account } = await accountUsecase.findAccountByUsername(role, username);
+        const { data: account } = await accountUsecase.findAccountByIdentifier(role, username, "username");
         if (account) {
-            if (account.email === "not_confirm") {
+            if (account.is_email_confirmed) {
                 await accountUsecase.sendConfirmEmailAgain({ ...account, email });
-                return responseSender(`200 : Done, Message sent to ${email} success. Check your mailbox.`, res);
+                responseSender(`200 : Done, Message sent to ${email} success. Check your mailbox.`, res);
+                return;
             }
             responseSender(new Error("404 : Your account has been confirmed."), res);
+            return;
         }
         responseSender(new Error("404 : Your account is not exist."), res);
     } catch (error) {
@@ -173,7 +170,10 @@ router.post(`${prefix}/logposter/email/confirm/send`, passport.verifyAuth, async
 
 router.get(`${prefix}/email/confirm/receive/success`, passport.verifyEmail, async (req, res) => {
     const { isConfirmEmail, role, email, username } = req.user;
-    if (isConfirmEmail) responseSender(`200 : ${email} has been confirmed.`, res);
+    if (isConfirmEmail) {
+        responseSender(`200 : ${email} has been confirmed.`, res);
+        return;
+    }
 
     try {
         await accountUsecase.confirmedWithEmail(role, username, email);

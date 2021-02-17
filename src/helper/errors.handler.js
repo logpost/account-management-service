@@ -10,7 +10,15 @@ const response = (responseData, res) => {
                 break;
             }
             case 401: {
-                reply.header("Content-Type", "application/json;charset=utf-8").code(replyponseData.error.code);
+                responseCode = res
+                    .header("Content-Type", "application/json;charset=utf-8")
+                    .status(responseData.error.code);
+                break;
+            }
+            case 402: {
+                responseCode = res
+                    .header("Content-Type", "application/json;charset=utf-8")
+                    .status(responseData.error.code);
                 break;
             }
             case 403: {

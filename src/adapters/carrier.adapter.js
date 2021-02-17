@@ -12,9 +12,9 @@ class CarrierAdapter {
         },
     });
 
-    findAccountByUsername = async (username) => {
+    findAccountByIdentifier = async (identifier, field) => {
         try {
-            const res = await this.#fetcher.get(`${this.#prefix}/srv/profile/${username}`);
+            const res = await this.#fetcher.get(`${this.#prefix}/srv/profile?${field}=${identifier}`);
             return res;
         } catch (error) {
             return error.response.data;
@@ -39,11 +39,10 @@ class CarrierAdapter {
         }
     };
 
-    confirmedWithEmail = async (username, email) => {
+    confirmedWithEmail = async (username) => {
         try {
             const res = await this.#fetcher.put(`${this.#prefix}/srv/confirmed/email`, {
                 identifier: { username },
-                email,
             });
             return res;
         } catch (error) {
