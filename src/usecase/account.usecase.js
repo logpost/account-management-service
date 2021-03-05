@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
-import RedisAdapter from "../adapters/redis.adapter";
-import NodeMailerAdapter from "../adapters/nodemailer.adapter";
-import AccountFactory from "../factorys/account.factory";
-import config from "../config";
 
+import NodeMailerAdapter from "../adapters/nodemailer.adapter";
+import RedisAdapter from "../adapters/redis.adapter";
+import config from "../config";
+import AccountFactory from "../factorys/account.factory";
 import { compareHashed } from "../helper/hashing.handler";
-import { createEmailConfirmToken, createAccessToken, createRefreshToken } from "../helper/token.handler";
+import { createAccessToken, createEmailConfirmToken, createRefreshToken } from "../helper/token.handler";
 
 class AccountUsecase {
     fetcher = new AccountFactory();
@@ -45,7 +45,7 @@ class AccountUsecase {
                         const refresh_token = createRefreshToken(account);
                         const access_token = createAccessToken(account);
                         await this.refreshTokenStore.set(refresh_token, username);
-                        if (account.is_email_confirmed) {
+                        if (!account.is_email_confirmed) {
                             const email_token = createEmailConfirmToken({ ...account, role });
                             return [refresh_token, access_token, email_token];
                         }
