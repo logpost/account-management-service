@@ -4,7 +4,7 @@
     "description": "",
     "main": "dist/server.js",
     "scripts": {
-        "start:dev": "NODE_ENV=development nodemon --watch './**/*.js' --exec babel-node ./src/server.js",
+        "start:dev": "NODE_ENV=development nodemon --delay 500ms --watch './**/*.js' --exec babel-node ./src/server.js",
         "start:stag": "NODE_ENV=staging node ./dist/server.js",
         "start:prod": "NODE_ENV=production node ./dist/server.js",
         "build": "babel ./src -d ./dist",
