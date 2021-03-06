@@ -23,5 +23,5 @@ COPY --from=builder /usr/src/app/node_modules node_modules/
 COPY --from=builder /usr/src/app/dist dist/
 COPY --from=builder /usr/src/app/config config/
 COPY --from=builder /usr/src/app/package.json .
-EXPOSE 8080 8080
+EXPOSE 5000 5000
 CMD [ "npm", "run", "start:stag"]

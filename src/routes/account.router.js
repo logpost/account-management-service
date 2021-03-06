@@ -13,7 +13,7 @@ const accountUsecase = new AccountUsecase();
 
 router.get(`${prefix}/healthcheck`, (_, res) => {
     responseHandler(async () => {
-        return "Server is alive.";
+        return "200 : Server is alive.";
     }, res);
 });
 
