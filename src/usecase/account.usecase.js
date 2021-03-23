@@ -12,26 +12,32 @@ class AccountUsecase {
     refreshTokenStore = RedisAdapter.getInstance();
 
     signup = async (role, profile) => {
-        let isOAuth2Signup = false;
+        try {
+            let isOAuth2Signup = false;
 
-        if (profile?.oauth2?.line?.user_id) {
-            isOAuth2Signup = true;
-            profile.is_email_confirmed = true;
-        }
-
-        const res = await this.fetcher.account[role].createAccount(profile);
-        if (res.status === 200) {
-            const { name, email } = profile;
-            if (isOAuth2Signup) {
-                return `201 : Signup with OAuth2 successfully.`;
-            } else {
-                const email_token = createEmailConfirmToken({ ...profile, role });
-                const transporter = await NodeMailerAdapter.getInstance();
-                transporter.send(name, email, role, email_token, "confirm_email");
-                return { email_token };
+            if (profile?.oauth2?.line?.user_id) {
+                isOAuth2Signup = true;
+                profile.is_email_confirmed = true;
             }
+
+            const res = await this.fetcher.account[role].createAccount(profile);
+            console.log(res);
+            if (res.status === 200) {
+                const { name, email } = profile;
+                if (isOAuth2Signup) {
+                    return `201 : Signup with OAuth2 successfully.`;
+                } else {
+                    const email_token = createEmailConfirmToken({ ...profile, role });
+                    // console.log(email_token);
+                    const transporter = await NodeMailerAdapter.getInstance();
+                    transporter.send(name, email, role, email_token, "confirm_email");
+                    return { email_token };
+                }
+            }
+        } catch (error) {
+            if (error.message) throw new Error(error.message);
+            else throw new Error("500 : Adapter isn't alive.");
         }
-        throw new Error(res.error.message);
     };
 
     login = async (role, username, password) => {

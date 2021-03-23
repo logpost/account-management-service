@@ -5,12 +5,11 @@ import express from "express";
 import ExpressSession from "express-session";
 import passport from "passport";
 
-import config from "./config";
-
-import OAuth2Route from "./routes/oauth2.router";
-import AccountRoute from "./routes/account.router";
 import NodeMailerAdapter from "./adapters/nodemailer.adapter";
 import RedisAdapter from "./adapters/redis.adapter";
+import config from "./config";
+import AccountRoute from "./routes/account.router";
+import OAuth2Route from "./routes/oauth2.router";
 
 if (process.env.NODE_ENV === "staging") {
     Profiler.start({
