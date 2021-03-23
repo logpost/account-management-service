@@ -6,6 +6,7 @@ GCR_TagStaging := asisa.gcr.io/${GCP_ProjectID}/${ImageName}
 
 docker-build:
 	docker build -f ${DockerPath} . -t ${GCR_TagStaging}
+	
 docker-push: 
 	docker push ${GCR_TagStaging}
 
@@ -17,10 +18,12 @@ hand-deploy-to-stag-step-1:
 	git push -u origin develop; \
 	git checkout stag-release; \
 	git pull origin develop;
+
 hand-deploy-to-stag-step-2:
 	git push -u origin stag-release; \
 	git checkout develop;
 
+hand-gcr-to-stag-step-1:
 	hand-gcr-to-stag-step-1:
 	git push -u origin develop; \
 	git checkout stag-release-image; \
