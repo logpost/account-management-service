@@ -8,7 +8,7 @@ COPY *.sh *.json *.js Makefile .babelrc ./
 COPY src src/ 
 COPY config config/
 
-RUN curl -o production.yml https://${GIT_ACCESS_TOKEN_CURL_CONFIG}@raw.githubusercontent.com/logpost/logpost-environment/master/environment/account-management-service/production.yml && mv production.yml config
+RUN curl -o production.yml https://${GIT_ACCESS_TOKEN_CURL_CONFIG}@raw.githubusercontent.com/logpost/logpost-environment/master/environment/account-management-service/production.yml
 RUN curl -o development.yml https://${GIT_ACCESS_TOKEN_CURL_CONFIG}@raw.githubusercontent.com/logpost/logpost-environment/master/environment/account-management-service/development.yml
 RUN curl -o staging.yml https://${GIT_ACCESS_TOKEN_CURL_CONFIG}@raw.githubusercontent.com/logpost/logpost-environment/master/environment/account-management-service/staging.yml
 RUN mv -f production.yml staging.yml development.yml config
